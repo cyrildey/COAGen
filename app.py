@@ -56,6 +56,9 @@ def similar_service_of(g,service):
     '''
     return (g.query(query))
 
+@app.get('/')
+def index():
+    return {'error x002':'invalide endpoint! check the documentation'}
 
 @app.get("/service/search")
 def search_service():
