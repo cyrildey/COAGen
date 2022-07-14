@@ -67,81 +67,53 @@ def search_service():
     Result_services=[] # list of the services in decreasing order of pertinance
     similar_services=dict() # list of similar services 
     search_sentence =[]
-    PoM =dict() #percentage of Matching (PoM)
-    #search_sentence.append(#input('Entrez la phrase a chercher'))
     search_sentence.append(search_input)
-    
 
-    #create a liste of words
-    word_list=search_sentence
-    word_list=remove_punct(search_sentence)
-    #word_list=remove_urls(word_list)
-    word_list=tokenize(word_list)
-    word_list=remove_stopwords(word_list)
-    word_list=remove_whitespace(word_list)
-    word_list=stemming(word_list)
+    sentence = search_input
+    results=[]
+    PoM = []
+    answers = dict()
 
-    #print('the word list is')
-    #print(word_list)
-    #input('enter to continue')
+    a_full = onto.search(has_all_data='*'+sentence+'*')
 
-    #construct queries
-    ''''
-    1- q1 search for the services having the complete word in one of it properties and take it as Result_services[0]
-    2- divide the search_sentence into words (word_list) (excludig words like 'the','is' etc)
-    3- q2 we select all the services related to one or many  of those word_list
-    '''
-    subq1 = search_sentence[0]
-    q1='''
-        prefix ab:<http://yowyob.org/service_onto.owl#>
-        SELECT distinct ?subject ?subject_label ?subject_description
-        WHERE {
-        ?subject ?predicate ?object
+    words = sentence.split(' ')
+    words=stemming(words)
+    for word in words:
+        results = set(results).union(onto.search(has_all_data='*'+word+'*'))
 
-        FILTER regex(?object, "''' + subq1 + '''", "i")
-        ?subject ab:has_label ?subject_label .
-        ?subject ab:has_description ?subject_description .
-        }
-        '''
+    i=0
+    for r in results:
+        data = str(r.has_label)
+        data =data.split(' ')
+        data = stemming(data)
+        data = remove_punct(data)
+        data = remove_urls(data)
+        P = 100*len(set(words).intersection(data))/len(words)
+        #P = cosine_sim(words, data)
+        #input(P)
+        if(P>=33):
+            r.has_PoM = P
+            temp={}
+            temp['label']=r.has_label
+            temp['description']=r.has_description
+            temp['id']=r.has_id
+            temp['PoM']=P
+            answers[i]=temp
+            i=i+1
 
-    subq2 = '|'.join(word_list)
-    q2='''
-        prefix ab:<http://yowyob.org/service_onto.owl#>
-        SELECT distinct ?subject ?subject_label ?subject_description
-        WHERE {
-        ?subject ?predicate ?object
-        FILTER regex(?object, "''' + subq2 + '''", "i")
-        ?subject ab:has_label ?subject_label .
-        ?subject ab:has_description ?subject_description .
-    }
-    '''
+    for r in a_full:
+        if(P>=33):
+            r.has_PoM = 100
+            temp={}
+            temp['label']=r.has_label
+            temp['description']=r.has_description
+            temp['id']=r.has_id
+            temp['PoM']=P
+            answers[i]=temp
+            i=i+1
 
-    #execute query
-    o1=g.query(q1)
-    #print(str(len(o1))+' elements found with complete match')
-    o2=g.query(q2)
-    #print(str(len(o2))+' elements found with patial match')
-
-    '''4- we calculate the percentage of Matching (PoM) as
-            PoM=(number of word Matching) / (total number of words in word_list)
-
-            **NB each word is counted only once
-    '''
-    for k in o1:
-        similar_services[k['subject']]=k
-        
-    len_word_list = len(word_list)
-    for r in o2:
-        service = r['subject_label'] + r['subject_description']
-        service = (service.replace("/", " ")).lower()
-        service = service.split()
-        #print(service)
-        ##input()
-        a=set(word_list).intersection(set(stemming(service)))
-        #print(a)
-        ##input()
-        PoM[r] = (len(a)/len_word_list)*100
-        #print((len(a)/len_word_list)*100)
+    return jsonify(answers),201
+    #input('loop 2 finished')
 
     #sort the list in decreasing oder of PoM
     PoM={k: v for k, v in sorted(PoM.items(), key=lambda item: item[1], reverse=True)}
@@ -153,11 +125,14 @@ def search_service():
         for i in a:
             similar_services[i['new_service4']]=i
         #input()
+    #input('loop 3 finished')
 
     #input()
 
     #content = {'PoM': PoM, 'similar_service':similar_services}
     return jsonify(similar_services),201
+
+    #return jsonify(PoM),201
 
 
 @app.get("/service")
