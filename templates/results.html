@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell","Fira Sans","Droid Sans","Helvetica Neue",sans-serif;
+        }
+        .main_div{
+            text-align: left;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #3865a9;
+        }
+        img{
+            width: 30px;
+            display: inline;
+            float: left;
+
+        }
+        form{
+            text-align: center;
+            display: inline;
+            margin-top: 25px;
+
+        }
+        #search_input{
+            width: 30%;
+            max-width: 600px;
+            border-radius: 30px;
+            height: 25px;
+
+        }
+        #search{
+            height: 30px;
+            font-size: larger;
+        }
+    </style>
+</head>
+<body>
+    <div class="main_div">
+        <img src="{{url_for('static', filename='logo.png')}}" alt="logo">
+        <form action="/service/search" method="get">
+            <input type="text" name="search_input" id="search_input">
+            <input type="submit" value="Search" id="search">
+        </form>
+    </div class="main_div">
+
+    <ul type="none">
+        <h6>{{ answers|length }} results found</h6>
+        {% for key,value in answers.items() %}
+            <li>           
+                <a href="{{value.id[0]}}">
+                    <p> {{value.label[0]}}</p>
+                </a>
+                <p>
+                    {{value.description[0]}}
+                </p>
+            <p style="color: green;">pourcentage of found words: {{value.PoM}}</p>
+        </li>
+        {% endfor %}
+
+        
+           
+    </ul>
+</body>
+</html>

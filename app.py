@@ -5,7 +5,7 @@ import os
 import sys
 #sys.path.append('../')
 #from owlready2 import *
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template
 #from text_preprocessing import *
 from insert_delete_update import *
 from  rdflib import Graph  # using rdflib to mange the ontology ////
@@ -58,9 +58,10 @@ def similar_service_of(g,service):
     '''
     return (g.query(query))
 
+
 @app.get('/')
 def index():
-    return {'error x002':'invalide endpoint! check the documentation'}
+   return render_template('index.html')
 
 @app.get("/service/search")
 def search_service():
@@ -98,13 +99,20 @@ def search_service():
     results=[]
     PoM = []
 
-    a_full = onto.search(has_all_data='*'+sentence+'*')
+    if len(sentence) <= 2:
+        return render_template('results.html',answers = {}),201
+    
 
     words = sentence.split(' ')
     words = remove_stopwords(words)
     words=stemming(words)
+
+    number_of_words = 0
     for word in words:
         results = set(results).union(onto.search(has_all_data='*'+word+'*'))
+        number_of_words += len(list(results))
+        if number_of_words > 50:
+            break
 
     i=0
     for r in results:
@@ -119,16 +127,13 @@ def search_service():
             answers[i]=temp
             i=i+1
 
-    for r in a_full:
-        temp={}
-        temp['label']=r.has_label
-        temp['description']=r.has_description
-        temp['id']=r.has_id
-        temp['PoM']=1
-        answers[i]=temp
-        i=i+1
+    
 
-    return jsonify(answers),201
+    '''for i in sorted(answers.items()['PoM']):
+        input(i, end=" ")'''
+    #answers = jsonify(answers)
+    answers = dict(sorted(answers.items(), key=lambda t: t[1]['PoM'], reverse=True))
+    return render_template('results.html',answers = answers),201
 
     #sort the list in decreasing oder of PoM
     PoM={k: v for k, v in sorted(PoM.items(), key=lambda item: item[1], reverse=True)}
@@ -147,7 +152,6 @@ def search_service():
     #content = {'PoM': PoM, 'similar_service':similar_services}
     return jsonify(similar_services),201
 
-    #return jsonify(PoM),201
 
 
 @app.get("/service")
@@ -278,4 +282,4 @@ def create_ontology():
         return {"error": "Input data must be JSON"}, 415
 
 if __name__ == '__main__':
-    app.run(debug=True)  # run our Flask app
+    app.run(debug=True,host='0.0.0.0')  # run our Flask app
