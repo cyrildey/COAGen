@@ -109,7 +109,7 @@ def search_service():
 
     number_of_words = 0
     for word in words:
-        results = set(results).union(onto.search(has_all_data='*'+word+'*'))
+        results = set(results).union(onto.search(has_label='*'+word+'*'))
         number_of_words += len(list(results))
         if number_of_words > 50:
             break
