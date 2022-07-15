@@ -9,6 +9,8 @@ from flask import Flask, request, jsonify
 #from text_preprocessing import *
 from insert_delete_update import *
 from  rdflib import Graph  # using rdflib to mange the ontology ////
+from sklearn.feature_extraction.text import TfidfVectorizer
+import nltk, string
 
 
 #onto_path.append('onto_path')
@@ -68,31 +70,47 @@ def search_service():
     similar_services=dict() # list of similar services 
     search_sentence =[]
     search_sentence.append(search_input)
+    answers = dict()
+
+    #sentence = search_sentence
+
+    stemmer = nltk.stem.porter.PorterStemmer()
+    remove_punctuation_map = dict((ord(char), None) for char in string.punctuation)
+
+    def stem_tokens(tokens):
+        return [stemmer.stem(item) for item in tokens]
+
+    '''remove punctuation, lowercase, stem'''
+    def normalize(text):
+        return stem_tokens(nltk.word_tokenize(text.lower().translate(remove_punctuation_map)))
+
+    vectorizer = TfidfVectorizer(tokenizer=normalize, stop_words='english')
+        
+
+    def cosine_sim(text1, text2):
+        text1 = str(text1)
+        text2 = str(text2)
+        tfidf = vectorizer.fit_transform([text1, text2])
+        return ((tfidf * tfidf.T).A)[0,1]
+
 
     sentence = search_input
     results=[]
     PoM = []
-    answers = dict()
 
     a_full = onto.search(has_all_data='*'+sentence+'*')
 
     words = sentence.split(' ')
+    words = remove_stopwords(words)
     words=stemming(words)
     for word in words:
         results = set(results).union(onto.search(has_all_data='*'+word+'*'))
 
     i=0
     for r in results:
-        data = str(r.has_label)
-        data =data.split(' ')
-        data = stemming(data)
-        data = remove_punct(data)
-        data = remove_urls(data)
-        P = 100*len(set(words).intersection(data))/len(words)
-        #P = cosine_sim(words, data)
-        #input(P)
-        if(P>=33):
-            r.has_PoM = P
+        data = str(r.has_all_data)
+        P = cosine_sim(sentence, data) * 100
+        if P > 0:
             temp={}
             temp['label']=r.has_label
             temp['description']=r.has_description
@@ -102,18 +120,15 @@ def search_service():
             i=i+1
 
     for r in a_full:
-        if(P>=33):
-            r.has_PoM = 100
-            temp={}
-            temp['label']=r.has_label
-            temp['description']=r.has_description
-            temp['id']=r.has_id
-            temp['PoM']=P
-            answers[i]=temp
-            i=i+1
+        temp={}
+        temp['label']=r.has_label
+        temp['description']=r.has_description
+        temp['id']=r.has_id
+        temp['PoM']=1
+        answers[i]=temp
+        i=i+1
 
     return jsonify(answers),201
-    #input('loop 2 finished')
 
     #sort the list in decreasing oder of PoM
     PoM={k: v for k, v in sorted(PoM.items(), key=lambda item: item[1], reverse=True)}
