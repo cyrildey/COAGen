@@ -60,11 +60,11 @@ def similar_service_of(g,service):
     return (g.query(query))
 
 
-@app.get('/')
+@app.get('/caogen')
 def index():
    return render_template('index.html')
 
-@app.get("/service/search")
+@app.get("/caogen/service/search")
 def search_service():
     search_input = request.args.get('search_input')
 
