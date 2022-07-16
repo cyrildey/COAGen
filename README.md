@@ -18,6 +18,7 @@ virtualenv <your-env>
 source <your-env>/bin/activate
 pip install flask SPARQLWrapper owlready2 nltk rdflib 
 python -m pip install sklearn 
+python nlt_downloads.py
 sudo ufw allow 5000
 
 ```
