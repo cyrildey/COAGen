@@ -15,9 +15,12 @@
             border-bottom: 1px solid #3865a9;
         }
         img{
-            width: 30px;
             display: inline;
             float: left;
+        }
+        img#logo{
+            width: 30px;
+            
 
         }
         form{
@@ -37,11 +40,20 @@
             height: 30px;
             font-size: larger;
         }
+        li{
+            text-align: left;
+            float: left;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .servise_image{
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="main_div">
-        <img src="{{url_for('static', filename='logo.png')}}" alt="logo">
+        <img id='logo' src="{{url_for('static', filename='logo.png')}}" alt="logo">
         <form action="/service/search" method="get">
             <input type="text" name="search_input" id="search_input">
             <input type="submit" value="Search" id="search">
@@ -53,13 +65,14 @@
         {% for key,value in answers.items() %}
             <li>           
                 <a href="{{value.id[0]}}">
+                    <img class="servise_image" src="https://api-services.yowyob.com/yowyob-services/api/v1/downloads/services/{{value.image[0]}}?size=150x150" alt="">
                     <p> {{value.label[0]}}</p>
                 </a>
                 <p>
                     {{value.description[0]}}
                 </p>
-            <p style="color: green;">pourcentage of found words: {{value.PoM}}</p>
-        </li>
+                <p style="color: green;">pourcentage of found words: {{value.PoM}}</p>
+            </li>
         {% endfor %}
 
         

@@ -3,6 +3,7 @@ this file is the base of the API (flask)
 '''
 import os
 import sys
+import ast
 #sys.path.append('../')
 #from owlready2 import *
 from flask import Flask, request, jsonify,render_template
@@ -11,7 +12,7 @@ from insert_delete_update import *
 from  rdflib import Graph  # using rdflib to mange the ontology ////
 from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk, string
-
+import json
 
 #onto_path.append('onto_path')
 
@@ -124,6 +125,13 @@ def search_service():
             temp['description']=r.has_description
             temp['id']=r.has_id
             temp['PoM']=P
+            x = str(r.has_all_data)
+            #x = x.replace("\'", "\"")
+            #x = json.loads(x)
+            #x = json.loads(x[0])
+            x = ast.literal_eval(x)
+            x[0] = ast.literal_eval(x[0])
+            temp['image']=x[0]['service_images']
             answers[i]=temp
             i=i+1
 
