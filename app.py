@@ -102,14 +102,18 @@ def search_service():
     if len(sentence) <= 2:
         return render_template('results.html',answers = {}),201
     
+    #results = set(results).union(onto.search(has_label='*'+sentence+'*'))
 
     words = sentence.split(' ')
     words = remove_stopwords(words)
     words=stemming(words)
 
     number_of_words = 0
+    #input(words)
     for word in words:
-        results = set(results).union(onto.search(has_label='*'+word+'*'))
+        results = set(results).union(onto.search(has_label='*'))
+        #input(results)
+        #results = set(results).union(onto.search(has_description='*blanche*'))
         number_of_words += len(list(results))
         if number_of_words > 50:
             break
