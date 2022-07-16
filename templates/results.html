@@ -53,7 +53,7 @@
 </head>
 <body>
     <div class="main_div">
-        <img id='logo' src="{{url_for('static', filename='logo.png')}}" alt="logo">
+        <img id='logo' src="/caogen{{url_for('static', filename='logo.png')}}" alt="logo">
         <form action="/caogen/service/search" method="get">
             <input type="text" name="search_input" id="search_input">
             <input type="submit" value="Search" id="search">
