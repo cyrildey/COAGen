@@ -5,6 +5,7 @@ If you get any difficulty using this API or hqve some propositions or reccommend
 ## Requirements 
 To use CAOGen, you need to have the following 
 1. Python 3.x.x
+2. pip3
 ## Installation
 Install this library in a [virtualenv](https://virtualenv.pypa.io/en/latest/) using pip. [virtualenv](https://virtualenv.pypa.io/en/latest/) is a tool to create isolated Python environments. The basic problem it addresses is one of dependencies and versions, and indirectly permissions.
 
