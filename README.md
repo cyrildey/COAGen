@@ -17,7 +17,8 @@ pip install virtualenv
 virtualenv <your-env>
 source <your-env>/bin/activate
 pip install flask SPARQLWrapper owlready2 nltk rdflib 
-python -m pip install sklearn or pip install -U scikit-learn
+python -m pip install sklearn 
+pip install -U scikit-learn
 python nlt_downloads.py
 sudo ufw allow 5000
 python app.py
