@@ -64,7 +64,7 @@ def similar_service_of(g,service):
 def index():
    return render_template('index.html')
 
-@app.get("/service/search")
+@app.get("caogen/service/search")
 def search_service():
     search_input = request.args.get('search_input')
 
@@ -141,7 +141,8 @@ def search_service():
         input(i, end=" ")'''
     #answers = jsonify(answers)
     answers = dict(sorted(answers.items(), key=lambda t: t[1]['PoM'], reverse=True))
-    return render_template('results.html',answers = answers),201
+    content={"answers":answers, "search_input":search_input}
+    return render_template('results.html',content = content),201
 
     #sort the list in decreasing oder of PoM
     PoM={k: v for k, v in sorted(PoM.items(), key=lambda item: item[1], reverse=True)}
