@@ -78,8 +78,25 @@ def search_service():
 
     words = sentence.split(' ')
     words=stemming(words)
-    for word in words:
-        results = set(results).union(onto.search(has_all_data='*'+word+'*'))
+    '''for word in words:
+        results = set(results).union(onto.search(has_all_data='*'+word+'*'))'''
+
+    subq2 = '|'.join(words)
+    q2='''
+        prefix ab:<http://yowyob.org/service_onto.owl#>
+        SELECT distinct ?subject ?label
+        WHERE {
+        ?subject ab:has_label ?label
+        FILTER regex(?object, "''' + subq2 + '''", "i")
+    }
+    '''
+
+    #execute query
+    results = g.query(q2)
+    for r in results:
+        print(r['label'])
+    quit()
+    
 
     i=0
     for r in results:
