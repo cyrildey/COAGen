@@ -64,7 +64,7 @@ def similar_service_of(g,service):
 def index():
    return render_template('index.html')
 
-@app.get("caogen/service/search")
+@app.get("/caogen/service/search")
 def search_service():
     search_input = request.args.get('search_input')
 
@@ -103,12 +103,53 @@ def search_service():
     if len(sentence) <= 2:
         return render_template('results.html',answers = {}),201
     
-
-    words = sentence.split(' ')
+    
+    words = sentence.strip()
+    words = words.split(' ')
     words = remove_stopwords(words)
     words=stemming(words)
+    subq2 = '|'.join(words)
+    #input(subq2)
 
-    number_of_words = 0
+    q1='''
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX ab: <http://yowyob.org/service_onto.owl#>
+        SELECT distinct ?label  ?id ?description ?all_data
+        WHERE {
+        ?subject ab:has_label ?label .
+        ?subject ab:has_description ?description .
+        ?subject ab:has_all_data ?all_data .
+        FILTER regex(?all_data, "'''+subq2+'''", "i").
+        } 
+        LIMIT 500
+    '''
+    results = g.query(q1)
+    i=0
+    
+    for r in results:
+        #input(r['label'])
+        data = str(r['label'])
+        P = cosine_sim(sentence, data) * 100
+        if P > 0:
+            temp={}
+            temp['label']=[r['label']]
+            temp['description']=[r['description']]
+            temp['id']=[r['id']]
+            temp['PoM']=P
+            x = str(r['all_data'])
+            #x = x.replace("\'", "\"")
+            #x = json.loads(x)
+            #x = json.loads(x[0])
+            x = ast.literal_eval(x)
+            #x[0] = ast.literal_eval(x[0])
+            #temp['image']=x[0]['service_images']
+            temp['image']=x['service_images']
+            answers[i]=temp
+            i=i+1
+
+
+    '''number_of_words = 0
     for word in words:
         results = set(results).union(onto.search(has_label='*'+word+'*'))
         number_of_words += len(list(results))
@@ -134,7 +175,7 @@ def search_service():
             temp['image']=x[0]['service_images']
             answers[i]=temp
             i=i+1
-
+    '''
     
 
     '''for i in sorted(answers.items()['PoM']):
